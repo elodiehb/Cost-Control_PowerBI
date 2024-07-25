@@ -1,0 +1,54 @@
+expression Call+Center+Data+2018 =
+		let
+		    Source = Csv.Document(File.Contents("C:\Users\kikol\OneDrive\Desktop\DataScientest_cours\exam\PowerBi\Call Center\csv\Call+Center+Data+2018.csv"),[Delimiter=",", Columns=6, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+		    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+		    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"CallTimestamp", type text}, {"Call Type", Int64.Type}, {"EmployeeID", type text}, {"CallDuration", Int64.Type}, {"WaitTime", Int64.Type}, {"CallAbandoned", Int64.Type}}),
+		    #"Removed Columns" = Table.RemoveColumns(#"Changed Type",{"CallAbandoned"}),
+		    #"Added Conditional Column" = Table.AddColumn(#"Removed Columns", "SLA Compliance", each if [WaitTime] < 35 then "Within SLA" else "Outside SLA"),
+		    #"Changed Type1" = Table.TransformColumnTypes(#"Added Conditional Column",{{"SLA Compliance", type text}}),
+		    #"Changed Type with Locale" = Table.TransformColumnTypes(#"Changed Type1", {{"CallTimestamp", type datetime}}, "en-US"),
+		    #"Renamed Columns" = Table.RenameColumns(#"Changed Type with Locale",{{"CallTimestamp", "Call Timestamp"}, {"EmployeeID", "Employee ID"}, {"CallDuration", "Call Duration"}, {"WaitTime", "Wait Time"}})
+		in
+		    #"Renamed Columns"
+	lineageTag: 55d819e9-2716-42af-bc1b-99ff79301147
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression Call+Center+Data+2019 =
+		let
+		    Source = Csv.Document(File.Contents("C:\Users\kikol\OneDrive\Desktop\DataScientest_cours\exam\PowerBi\Call Center\csv\Call+Center+Data+2019.csv"),[Delimiter=",", Columns=6, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+		    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+		    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"CallTimestamp", type text}, {"Call Type", Int64.Type}, {"EmployeeID", type text}, {"CallDuration", Int64.Type}, {"WaitTime", Int64.Type}, {"CallAbandoned", Int64.Type}}),
+		    #"Removed Columns" = Table.RemoveColumns(#"Changed Type",{"CallAbandoned"}),
+		    #"Added Conditional Column" = Table.AddColumn(#"Removed Columns", "SLA Compliance", each if [WaitTime] < 35 then "Within SLA" else "Outside SLA"),
+		    #"Changed Type1" = Table.TransformColumnTypes(#"Added Conditional Column",{{"SLA Compliance", type text}}),
+		    #"Changed Type with Locale" = Table.TransformColumnTypes(#"Changed Type1", {{"CallTimestamp", type datetime}}, "en-US"),
+		    #"Renamed Columns" = Table.RenameColumns(#"Changed Type with Locale",{{"CallTimestamp", "Call Timestamp"}, {"EmployeeID", "Employee ID"}, {"CallDuration", "Call Duration"}, {"WaitTime", "Wait Time"}})
+		in
+		    #"Renamed Columns"
+	lineageTag: 89bee276-3c7e-4f3f-aa92-d024a37036ff
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression Call+Center+Data+2020 =
+		let
+		    Source = Csv.Document(File.Contents("C:\Users\kikol\OneDrive\Desktop\DataScientest_cours\exam\PowerBi\Call Center\csv\Call+Center+Data+2020.csv"),[Delimiter=",", Columns=6, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+		    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+		    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"CallTimestamp", type text}, {"Call Type", Int64.Type}, {"EmployeeID", type text}, {"CallDuration", Int64.Type}, {"WaitTime", Int64.Type}, {"CallAbandoned", Int64.Type}}),
+		    #"Removed Columns" = Table.RemoveColumns(#"Changed Type",{"CallAbandoned"}),
+		    #"Added Conditional Column" = Table.AddColumn(#"Removed Columns", "SLA Compliance", each if [WaitTime] < 35 then "Within SLA" else "Outside SLA"),
+		    #"Changed Type1" = Table.TransformColumnTypes(#"Added Conditional Column",{{"SLA Compliance", type text}}),
+		    #"Changed Type with Locale" = Table.TransformColumnTypes(#"Changed Type1", {{"CallTimestamp", type datetime}}, "en-US"),
+		    #"Renamed Columns" = Table.RenameColumns(#"Changed Type with Locale",{{"CallTimestamp", "Call Timestamp"}, {"EmployeeID", "Employee ID"}, {"CallDuration", "Call Duration"}, {"WaitTime", "Wait Time"}})
+		in
+		    #"Renamed Columns"
+	lineageTag: 86b64f67-563e-42b8-925d-1fed41ff451f
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

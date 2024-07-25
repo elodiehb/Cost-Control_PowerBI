@@ -1,0 +1,71 @@
+table 'Call Charges'
+	lineageTag: e3b9b076-20c1-48c2-bd32-119072790464
+
+	column 'Call Type Key'
+		dataType: int64
+		formatString: 0
+		lineageTag: 74914be7-6b18-46bd-881b-cf38f14a3764
+		summarizeBy: none
+		sourceColumn: Call Type Key
+
+		annotation SummarizationSetBy = Automatic
+
+	column Year
+		dataType: string
+		lineageTag: ac149e9d-ea4e-42ea-bfe9-ff4af5c5c9c4
+		summarizeBy: none
+		sourceColumn: Year
+
+		annotation SummarizationSetBy = Automatic
+
+	column Dollars
+		dataType: decimal
+		formatString: #,0.###############\ "€";-#,0.###############\ "€";#,0.###############\ "€"
+		lineageTag: 6da46066-d50f-4db6-bd38-73d3af87635c
+		summarizeBy: none
+		sourceColumn: Dollars
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"fr-FR"}
+
+	column Concat_Year_CallTypeKey = ```
+			CONCATENATE( FORMAT('Call Charges'[Year], "0"), FORMAT('Call Charges'[Call Type Key], "0") )
+			
+			```
+		dataType: string
+		lineageTag: 5262f4cc-f2f6-48d5-84b3-8b08e0588e9d
+		summarizeBy: none
+		isDataTypeInferred
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Call Charges' = m
+		mode: import
+		source =
+				let
+				    Source = Excel.Workbook(File.Contents("C:\Users\kikol\OneDrive\Desktop\DataScientest_cours\exam\PowerBi\Call Center\Call Charges.xlsx"), null, true),
+				    CallCharges_Table = Source{[Item="CallCharges",Kind="Table"]}[Data],
+				    #"Changed Type" = Table.TransformColumnTypes(CallCharges_Table,{{"Call Type Key", Int64.Type}, {"Call Type ", type text}, {"Call Charges 2018 (Min)", type number}, {"Call Charges 2019 (Min)", type number}, {"Call Charges 2020 (Min)", type number}, {"Call Charges 2021 (Min)", type number}}),
+				    #"Removed Columns" = Table.RemoveColumns(#"Changed Type",{"Call Type "}),
+				    #"Added Custom" = Table.AddColumn(#"Removed Columns", "Call Charges 2018 (Sec)", each [#"Call Charges 2018 (Min)"]/60),
+				    #"Reordered Columns" = Table.ReorderColumns(#"Added Custom",{"Call Type Key", "Call Charges 2018 (Min)", "Call Charges 2018 (Sec)", "Call Charges 2019 (Min)", "Call Charges 2020 (Min)", "Call Charges 2021 (Min)"}),
+				    #"Added Custom1" = Table.AddColumn(#"Reordered Columns", "Call Charges 2019 (Sec)", each [#"Call Charges 2019 (Min)"]/60),
+				    #"Reordered Columns1" = Table.ReorderColumns(#"Added Custom1",{"Call Type Key", "Call Charges 2018 (Min)", "Call Charges 2018 (Sec)", "Call Charges 2019 (Min)", "Call Charges 2019 (Sec)", "Call Charges 2020 (Min)", "Call Charges 2021 (Min)"}),
+				    #"Added Custom2" = Table.AddColumn(#"Reordered Columns1", "Call Charges 2020 (Sec)", each [#"Call Charges 2020 (Min)"]/60),
+				    #"Reordered Columns2" = Table.ReorderColumns(#"Added Custom2",{"Call Type Key", "Call Charges 2018 (Min)", "Call Charges 2018 (Sec)", "Call Charges 2019 (Min)", "Call Charges 2019 (Sec)", "Call Charges 2020 (Min)", "Call Charges 2020 (Sec)", "Call Charges 2021 (Min)"}),
+				    #"Added Custom3" = Table.AddColumn(#"Reordered Columns2", "Call Charges 2021 (Sec)", each [#"Call Charges 2021 (Min)"]/60),
+				    #"Removed Columns1" = Table.RemoveColumns(#"Added Custom3",{"Call Charges 2018 (Min)", "Call Charges 2019 (Min)", "Call Charges 2020 (Min)", "Call Charges 2021 (Min)"}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Removed Columns1",{{"Call Charges 2018 (Sec)", "2018"}, {"Call Charges 2019 (Sec)", "2019"}, {"Call Charges 2020 (Sec)", "2020"}, {"Call Charges 2021 (Sec)", "2021"}}),
+				    #"Unpivoted Columns" = Table.UnpivotOtherColumns(#"Renamed Columns", {"Call Type Key"}, "Attribute", "Value"),
+				    #"Renamed Columns1" = Table.RenameColumns(#"Unpivoted Columns",{{"Attribute", "Year"}, {"Value", "Dollars"}}),
+				    #"Changed Type with Locale" = Table.TransformColumnTypes(#"Renamed Columns1", {{"Dollars", Currency.Type}}, "en-US")
+				in
+				    #"Changed Type with Locale"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

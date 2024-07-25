@@ -1,0 +1,16 @@
+relationship AutoDetected_9537ab74-3142-4fc6-b3b3-0c13cedbe8dd
+	fromColumn: 'Call Center Data'.'Employee ID'
+	toColumn: Employees.'Employee ID'
+
+relationship 21a4eb45-4d4d-d57a-7fa3-e1b9e017a70e
+	fromColumn: 'Call Center Data'.'Call Type Key'
+	toColumn: 'Call Type'.'Call Type Key'
+
+relationship 3be4baa5-98a1-a9c6-a79f-1c949bdd413a
+	fromColumn: 'Call Center Data'.'Call Date'
+	toColumn: Date.Date
+
+relationship 3b1f8f93-6872-27ea-ebdb-d2d9714acecc
+	fromColumn: 'Call Center Data'.Concat_Year_CallTypeKey
+	toColumn: 'Call Charges'.Concat_Year_CallTypeKey
+

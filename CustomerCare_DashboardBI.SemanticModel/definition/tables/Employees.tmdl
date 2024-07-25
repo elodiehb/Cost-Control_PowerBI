@@ -1,0 +1,63 @@
+table Employees
+	lineageTag: e573b80b-7723-4882-bf08-3d7948cfad87
+
+	column 'Employee ID'
+		dataType: string
+		lineageTag: 12cf4fc0-8bd7-4840-bac9-00f4396d7c2f
+		summarizeBy: none
+		sourceColumn: Employee ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Employee Name'
+		dataType: string
+		lineageTag: dc547453-c6a6-4c4f-b9d5-538e46ca61b0
+		summarizeBy: none
+		sourceColumn: Employee Name
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Site Location'
+		dataType: string
+		lineageTag: 200b13df-20d8-4c53-b8c9-b72639799cbd
+		summarizeBy: none
+		sourceColumn: Site Location
+
+		annotation SummarizationSetBy = Automatic
+
+	column State
+		dataType: string
+		lineageTag: ac269643-c826-4072-a9ee-0bd17a31214c
+		summarizeBy: none
+		sourceColumn: State
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Manager Name'
+		dataType: string
+		lineageTag: 47748da9-e7e5-4223-af55-26fcfc7b870a
+		summarizeBy: none
+		sourceColumn: Manager Name
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Employees = m
+		mode: import
+		source =
+				let
+				    Source = Excel.Workbook(File.Contents("C:\Users\kikol\OneDrive\Desktop\DataScientest_cours\exam\PowerBi\Call Center\Lookup+Tables.xlsx"), null, true),
+				    Employees_Sheet = Source{[Item="Employees",Kind="Sheet"]}[Data],
+				    #"Changed Type" = Table.TransformColumnTypes(Employees_Sheet,{{"Column1", type text}, {"Column2", type text}, {"Column3", type text}, {"Column4", type text}}),
+				    #"Promoted Headers" = Table.PromoteHeaders(#"Changed Type", [PromoteAllScalars=true]),
+				    #"Changed Type1" = Table.TransformColumnTypes(#"Promoted Headers",{{"EmployeeID", type text}, {"EmployeeName", type text}, {"Site", type text}, {"ManagerName", type text}}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Changed Type1",{{"EmployeeID", "Employee ID"}, {"EmployeeName", "Employee Name"}, {"ManagerName", "Manager Name"}}),
+				    #"Split Column by Delimiter" = Table.SplitColumn(#"Renamed Columns", "Site", Splitter.SplitTextByDelimiter(",", QuoteStyle.Csv), {"Site.1", "Site.2"}),
+				    #"Changed Type2" = Table.TransformColumnTypes(#"Split Column by Delimiter",{{"Site.1", type text}, {"Site.2", type text}}),
+				    #"Renamed Columns1" = Table.RenameColumns(#"Changed Type2",{{"Site.1", "Site Location"}, {"Site.2", "State"}})
+				in
+				    #"Renamed Columns1"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

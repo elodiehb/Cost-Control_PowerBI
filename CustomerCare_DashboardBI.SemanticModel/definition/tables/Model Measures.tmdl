@@ -1,0 +1,90 @@
+table 'Model Measures'
+	lineageTag: d5ef7fb8-42ba-479c-a743-ae5d567e487f
+
+	measure CallNumber = COUNTROWS('Call Center Data')
+		formatString: 0
+		displayFolder: CallNumber
+		lineageTag: 1ba47f03-ea16-4c96-ae18-637210679898
+
+	measure 'CallNumber Outside SLA' = Countrows(FILTER('Call Center Data', 'Call Center Data'[SLA Compliance]= "Outside SLA"))
+		formatString: 0
+		displayFolder: CallNumber
+		lineageTag: 28ab579f-70f6-4084-a763-2609f5372173
+
+	measure TotalCost = SUM('Call Center Data'[Total Cost Per Call($)])
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		displayFolder: Cost
+		lineageTag: aef731c4-306a-4d0a-8652-7fc0e498a35d
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Highest Duration' = Max('Call Center Data'[Call Duration(Min)])
+		displayFolder: Duration
+		lineageTag: 7960a773-eb60-4a27-bf6f-ad520ea33a01
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Average Duration' = AVERAGE('Call Center Data'[Call Duration(Min)])
+		displayFolder: Duration
+		lineageTag: c78cbf05-247d-416b-8aa4-690949e48976
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Cost PY' =
+			CALCULATE(
+			    [TotalCost],
+			    SAMEPERIODLASTYEAR('Date'[Date])
+			    )
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		displayFolder: Cost
+		lineageTag: 4ea34ade-1e2a-49a4-970f-b17410c9297a
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Total Cost YTD LY' =
+			CALCULATE(
+			    [Total Cost PY],
+			    SAMEPERIODLASTYEAR('Date'[Date]
+			    ))
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		displayFolder: Cost
+		lineageTag: 6f9cf1f4-2fc0-465a-8ccb-c6087bbd216a
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Total Cost YoY Growth' = [TotalCost]- [Total Cost PY]
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		displayFolder: Cost
+		lineageTag: ccf4eaf1-6887-417c-88c9-bafcb55e2aed
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Total Cost YoY Growth %' =
+			
+			DIVIDE([Total Cost YoY Growth],
+			[Total Cost PY],"Not Applicable"
+			)
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: Cost
+		lineageTag: 99e78b67-286b-455a-a05c-98bee312648b
+
+	column Column
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: fed1a881-b6b8-45d7-a343-3565506186b7
+		summarizeBy: sum
+		isNameInferred
+		isDataTypeInferred
+		sourceColumn: [Column]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Model Measures' = calculated
+		mode: import
+		source = Row("Column", BLANK())
+
+	annotation PBI_Id = 51cf098515924a8ab61dcd4930703991
+
+	annotation 436ba87b-9c83-4389-a31b-ebd06a36be98 = {"Expression":""}
+

@@ -1,0 +1,147 @@
+table 'Call Center Data'
+	lineageTag: 01bf70bc-e75f-4f72-8967-39879dffecdf
+
+	column 'Call Date'
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: 9bf2e83d-f4ea-4138-afc6-1fde49204943
+		summarizeBy: none
+		sourceColumn: Call Date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column 'Call Type Key'
+		dataType: int64
+		formatString: 0
+		lineageTag: 3a3e0660-72fb-41a1-a41d-c7b9ab5efff0
+		summarizeBy: none
+		sourceColumn: Call Type Key
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Employee ID'
+		dataType: string
+		lineageTag: 08fdc837-cc1d-4705-a827-b5c865c21946
+		summarizeBy: none
+		sourceColumn: Employee ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Duration (Sec)'
+		dataType: int64
+		formatString: 0
+		lineageTag: d2df6a05-8c5f-4c57-bff7-1b6759bf3b3c
+		summarizeBy: sum
+		sourceColumn: Duration (Sec)
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Wait Time'
+		dataType: int64
+		formatString: 0
+		lineageTag: 7f35aaec-94b5-483d-9efc-f854357648da
+		summarizeBy: sum
+		sourceColumn: Wait Time
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'SLA Compliance'
+		dataType: string
+		lineageTag: 8ef47fb8-59d7-42e4-a4ff-4700bdc1445d
+		summarizeBy: none
+		sourceColumn: SLA Compliance
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Call Duration(Min)' = 'Call Center Data'[Duration (Sec)] / 60
+		dataType: double
+		lineageTag: 8bcaad6c-c2d3-4216-8438-88a05a7b0e4f
+		summarizeBy: sum
+		isDataTypeInferred
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Year
+		dataType: int64
+		formatString: 0
+		lineageTag: c98641bf-2292-4bd2-a02b-6d89cb048a94
+		summarizeBy: sum
+		sourceColumn: Year
+
+		annotation SummarizationSetBy = Automatic
+
+	column Concat_Year_CallTypeKey = ```
+			CONCATENATE( FORMAT('Call Center Data'[Year], "0"), FORMAT('Call Center Data'[Call Type Key], "0") )
+			
+			```
+		dataType: string
+		lineageTag: 337f0321-b53b-46ee-a826-5002cebb0af6
+		summarizeBy: none
+		isDataTypeInferred
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Cost per Second($)' = ```
+			LOOKUPVALUE(
+			    'Call Charges'[Dollars], // La colonne à renvoyer
+			    'Call Charges'[Concat_Year_CallTypeKey], 'Call Center Data'[Concat_Year_CallTypeKey] // Correspondance de clé
+			)
+			
+			```
+		dataType: decimal
+		lineageTag: b3b9a3cd-2d26-4077-a05e-ba4baf4f1352
+		summarizeBy: none
+		isDataTypeInferred
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Total Cost Per Call($)' = 'Call Center Data'[Cost per Second($)] * 'Call Center Data'[Duration (Sec)]
+		dataType: decimal
+		lineageTag: a086e6c4-5e03-4df2-8b44-43fe0fdb38ca
+		summarizeBy: sum
+		isDataTypeInferred
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition 'Call Center Data' = m
+		mode: import
+		source =
+				let
+				    Source = Excel.Workbook(File.Contents("C:\Users\kikol\OneDrive\Desktop\DataScientest_cours\exam\PowerBi\Call Center\Call+Center+Data+2021.xlsx"), null, true),
+				    #"Call+Center+Data+2021_Sheet" = Source{[Item="Call+Center+Data+2021",Kind="Sheet"]}[Data],
+				    #"Promoted Headers" = Table.PromoteHeaders(#"Call+Center+Data+2021_Sheet", [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"CallTimestamp", type datetime}, {"Call Type", Int64.Type}, {"EmployeeID", type text}, {"CallDuration", Int64.Type}, {"WaitTime", Int64.Type}, {"CallAbandoned", Int64.Type}}),
+				    #"Removed Columns" = Table.RemoveColumns(#"Changed Type",{"CallAbandoned"}),
+				    #"Added Conditional Column" = Table.AddColumn(#"Removed Columns", "SLA Compliance", each if [WaitTime] < 35 then "Within SLA" else "Outside SLA"),
+				    #"Changed Type with Locale1" = Table.TransformColumnTypes(#"Added Conditional Column", {{"CallTimestamp", type date}}, "en-US"),
+				    #"Renamed Columns" = Table.RenameColumns(#"Changed Type with Locale1",{{"WaitTime", "Wait Time"}, {"CallDuration", "Call Duration"}, {"EmployeeID", "Employee ID"}, {"CallTimestamp", "Call Timestamp"}}),
+				    #"Appended Query" = Table.Combine({#"Renamed Columns", #"Call+Center+Data+2018"}),
+				    #"Appended Query1" = Table.Combine({#"Appended Query", #"Call+Center+Data+2019"}),
+				    #"Appended Query2" = Table.Combine({#"Appended Query1", #"Call+Center+Data+2020"}),
+				    #"Renamed Columns1" = Table.RenameColumns(#"Appended Query2",{{"Call Type", "Call Type Key"}}),
+				    #"Changed Type with Locale" = Table.TransformColumnTypes(#"Renamed Columns1", {{"Call Timestamp", type date}}, "en-US"),
+				    #"Renamed Columns2" = Table.RenameColumns(#"Changed Type with Locale",{{"Call Duration", "Call Duration(Sec)"}}),
+				    #"Added Conditional Column1" = Table.AddColumn(#"Renamed Columns2", "OutsideSLA", each if [SLA Compliance] = "Outside SLA" then true else false),
+				    #"Duplicated Column" = Table.DuplicateColumn(#"Added Conditional Column1", "Call Timestamp", "Call Timestamp - Copy"),
+				    #"Duplicated Column1" = Table.DuplicateColumn(#"Duplicated Column", "Call Timestamp", "Call Timestamp - Copy.1"),
+				    #"Renamed Columns3" = Table.RenameColumns(#"Duplicated Column1",{{"Call Timestamp - Copy.1", "Year"}}),
+				    #"Extracted Year" = Table.TransformColumns(#"Renamed Columns3",{{"Year", Date.Year, Int64.Type}}),
+				    #"Reordered Columns" = Table.ReorderColumns(#"Extracted Year",{"Call Timestamp", "Year", "Call Type Key", "Employee ID", "Call Duration(Sec)", "Wait Time", "SLA Compliance", "OutsideSLA", "Call Timestamp - Copy"}),
+				    #"Filtered Rows" = Table.SelectRows(#"Reordered Columns", each true),
+				    #"Removed Columns1" = Table.RemoveColumns(#"Filtered Rows",{"Call Timestamp - Copy", "OutsideSLA"}),
+				    #"Renamed Columns4" = Table.RenameColumns(#"Removed Columns1",{{"Call Timestamp", "Call Date"}, {"Call Duration(Sec)", "Duration (Sec)"}})
+				in
+				    #"Renamed Columns4"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

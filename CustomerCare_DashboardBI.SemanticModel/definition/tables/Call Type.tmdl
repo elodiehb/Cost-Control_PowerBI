@@ -1,0 +1,46 @@
+table 'Call Type'
+	lineageTag: f4334cfc-f845-4054-a181-bac08434585e
+
+	column 'Call Type '
+		dataType: string
+		lineageTag: 32e8c102-3796-4565-a0b5-cd4cb12f0d15
+		summarizeBy: none
+		sourceColumn: "Call Type "
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Call Type Key'
+		dataType: int64
+		formatString: 0
+		lineageTag: 1dc45f60-1ce5-4fa2-aa73-177c72d69c03
+		summarizeBy: none
+		sourceColumn: Call Type Key
+
+		annotation SummarizationSetBy = Automatic
+
+	column Department
+		dataType: string
+		lineageTag: ea73023c-8ab2-45df-b0b3-0619397c17ba
+		summarizeBy: none
+		sourceColumn: Department
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Call Type' = m
+		mode: import
+		source =
+				let
+				    Source = Excel.Workbook(File.Contents("C:\Users\kikol\OneDrive\Desktop\DataScientest_cours\exam\PowerBi\Call Center\Call Charges.xlsx"), null, true),
+				    CallCharges_Table = Source{[Item="CallCharges",Kind="Table"]}[Data],
+				    #"Changed Type" = Table.TransformColumnTypes(CallCharges_Table,{{"Call Type Key", Int64.Type}, {"Call Type ", type text}, {"Call Charges 2018 (Min)", type number}, {"Call Charges 2019 (Min)", type number}, {"Call Charges 2020 (Min)", type number}, {"Call Charges 2021 (Min)", type number}}),
+				    #"Removed Other Columns" = Table.SelectColumns(#"Changed Type",{"Call Type ", "Call Type Key"}),
+				    #"Reordered Columns" = Table.ReorderColumns(#"Removed Other Columns",{"Call Type Key", "Call Type "}),
+				    #"Duplicated Column" = Table.DuplicateColumn(#"Reordered Columns", "Call Type ", "Call Type  - Copy"),
+				    #"Renamed Columns" = Table.RenameColumns(#"Duplicated Column",{{"Call Type  - Copy", "Department"}})
+				in
+				    #"Renamed Columns"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

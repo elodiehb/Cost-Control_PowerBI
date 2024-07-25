@@ -1,0 +1,120 @@
+table Date
+	lineageTag: 215b615f-ab71-4327-ab16-3cb6acda0971
+	dataCategory: Time
+
+	column Date
+		dataType: dateTime
+		isKey
+		formatString: General Date
+		lineageTag: 15f4eefd-1d1c-4371-8751-94583f4933cb
+		summarizeBy: none
+		isNameInferred
+		isDataTypeInferred
+		sourceColumn: [Date]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Year = YEAR('Date'[Date])
+		dataType: int64
+		formatString: 0
+		lineageTag: a079ed23-4588-406e-9a5f-91aa728cd435
+		summarizeBy: none
+		isDataTypeInferred
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Month Number' = MONTH('Date'[Date])
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: da45d769-cfa4-4337-8a6e-1cbe011aab7a
+		summarizeBy: none
+		isDataTypeInferred
+
+		annotation SummarizationSetBy = Automatic
+
+	column Month = FORMAT('Date'[Date], "MMMM", "en-US")
+		dataType: string
+		lineageTag: 4f8b9f31-fa59-49a0-95c8-43c504dfe043
+		summarizeBy: none
+		isDataTypeInferred
+		sortByColumn: 'Month Number'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Month & Year ID' = FORMAT('Date'[Date], "YYYYMM")
+		dataType: string
+		isHidden
+		lineageTag: a8752b55-0807-4f25-8320-47f032e07cec
+		summarizeBy: none
+		isDataTypeInferred
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Month & Year' = FORMAT('Date'[Date], "MMMM YYYY")
+		dataType: string
+		lineageTag: 22d576de-8276-45c7-bd22-b3f7104d6185
+		summarizeBy: none
+		isDataTypeInferred
+
+		annotation SummarizationSetBy = Automatic
+
+	column Day = DAY('Date'[Date])
+		dataType: int64
+		formatString: 0
+		lineageTag: 26310bfb-3517-442c-b97a-b4ac4706a302
+		summarizeBy: none
+		isDataTypeInferred
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Weekday Number' = WEEKDAY('Date'[Date], 2)
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 91e8bcfc-7abf-442e-90f8-82c0cfda3f5d
+		summarizeBy: none
+		isDataTypeInferred
+
+		annotation SummarizationSetBy = Automatic
+
+	column Weekday = FORMAT('Date'[Date], "dddd", "en-US")
+		dataType: string
+		lineageTag: faf6dc04-6cc4-4fff-a0c4-cea8962d8219
+		summarizeBy: none
+		isDataTypeInferred
+
+		annotation SummarizationSetBy = Automatic
+
+	column Quarter = "Q" & QUARTER('Date'[Date])
+		dataType: string
+		lineageTag: 38736e85-7daa-4819-a995-b581044ef7ff
+		summarizeBy: none
+		isDataTypeInferred
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Quarter & Year ID' = FORMAT('Date'[Date], "YYYYQ")
+		dataType: string
+		isHidden
+		lineageTag: 8e6d33e7-8130-4861-ba4b-fbf1387df47f
+		summarizeBy: none
+		isDataTypeInferred
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Quarter & Year' = 'Date'[Quarter] & " " & 'Date'[Year]
+		dataType: string
+		lineageTag: 225176e9-c635-454d-bb83-62b09cb60c34
+		summarizeBy: none
+		isDataTypeInferred
+		sortByColumn: 'Quarter & Year ID'
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Date = calculated
+		mode: import
+		source = CALENDARAUTO()
+
+	annotation PBI_Id = bee17ac027ea49b1821232f7091a9dfc
+

@@ -1,0 +1,26 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: fr-FR
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation PBI_QueryOrder = ["Call+Center+Data+2018","Call+Center+Data+2019","Call+Center+Data+2020","Call Center Data","Call Charges","Employees","Call Type"]
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation PBIDesktopVersion = 2.131.1126.0 (24.07)
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table DateTableTemplate_e658edfb-d348-4cae-813b-f2365109106b
+ref table 'Call Center Data'
+ref table 'Call Charges'
+ref table Employees
+ref table 'Call Type'
+ref table Date
+ref table 'Model Measures'
+
+ref cultureInfo en-US
+
